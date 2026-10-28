@@ -1,0 +1,21 @@
+# Залежності та збірка
+node_modules
+dist
+dist-ssr
+
+# Змінні середовища (секрети не комітимо)
+.env
+.env.*
+!.env.example
+
+# Журнали
+logs
+*.log
+npm-debug.log*
+
+# Редактор і система
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.local
