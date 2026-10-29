@@ -1,31 +1,25 @@
-import PeakCard from "../components/PeakCard.jsx";
-import { peaks } from "../data/peaks.js";
+import { peaks } from '../data/peaks.js'
+import Section from '../components/ui/Section.jsx'
+import CatalogSummary from '../components/peaks/CatalogSummary.jsx'
+import PeakList from '../components/peaks/PeakList.jsx'
 
+// Сторінка поєднує дані й компоненти подання.
 function HomePage() {
   return (
     <>
-      <section id="about">
-        <h2>Про сервіс</h2>
+      <Section id="about" title="Про сервіс">
         <p>
           «Карпатські маршрути» допомагають переглянути вершини Українських
           Карпат і спланувати похід.
         </p>
-      </section>
+      </Section>
 
-      <section id="peaks">
-        <h2>Вершини</h2>
-        {peaks.length === 0 ? (
-          <p>Вершини ще не додано.</p>
-        ) : (
-          <div className="peak-grid">
-            {peaks.map((peak) => (
-              <PeakCard key={peak.id} peak={peak} />
-            ))}
-          </div>
-        )}
-      </section>
+      <Section id="peaks" title="Вершини">
+        <CatalogSummary total={peaks.length} />
+        <PeakList peaks={peaks} />
+      </Section>
     </>
-  );
+  )
 }
 
-export default HomePage;
+export default HomePage

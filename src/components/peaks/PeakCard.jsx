@@ -1,3 +1,6 @@
+import RoutesBadge from './RoutesBadge.jsx'
+
+// Подання однієї вершини. peak — коректний запис із src/data/peaks.js.
 function PeakCard({ peak }) {
   return (
     <article className="peak-card">
@@ -6,11 +9,11 @@ function PeakCard({ peak }) {
         {peak.heightM} м · {peak.massif}
       </p>
       <p>{peak.description}</p>
-      <p className="status">
-        {peak.hasRoutes ? "Маршрути додано" : "Маршрутів ще немає"}
+      <p>
+        <RoutesBadge hasRoutes={peak.hasRoutes} />
       </p>
     </article>
-  );
+  )
 }
 
-export default PeakCard;
+export default PeakCard

@@ -1,12 +1,36 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, sans-serif; color: #1d2a24; background: #f4f7f5; }
-.header { display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; background: #2f6f4f; color: #fff; }
-.header h1 { margin: 0; font-size: 1.5rem; }
-.header nav a { color: #fff; margin-left: 16px; }
 main { max-width: 960px; margin: 0 auto; padding: 24px; }
-.peak-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-.peak-card { background: #fff; border: 1px solid #d5e0da; border-radius: 8px; padding: 16px; }
+main:focus { outline: none; }
+section { margin-bottom: 32px; }
+
+/* Заголовок і навігація */
+.site-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 24px; background: #2f6f4f; color: #fff; }
+.site-header h1 { margin: 0; font-size: 1.5rem; }
+.nav-list { display: flex; flex-wrap: wrap; gap: 1rem; list-style: none; margin: 0; padding: 0; }
+.nav-list a { color: #fff; }
+.skip-link { position: absolute; left: -9999px; }
+.skip-link:focus { position: static; display: inline-block; margin: 0.5rem 1rem; }
+.footer { text-align: center; padding: 16px; color: #567; }
+
+/* Каталог */
+.peak-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; list-style: none; margin: 0; padding: 0; }
+.peak-card { height: 100%; background: #fff; border: 1px solid #d5e0da; border-radius: 8px; padding: 16px; overflow-wrap: anywhere; }
 .peak-card h3 { margin: 0 0 4px; }
 .meta { color: #567; margin: 0 0 8px; }
-.status { font-weight: 600; margin-bottom: 0; }
-.footer { text-align: center; padding: 16px; color: #567; }
+.status { font-weight: 600; }
+.status.available { color: #1f6b3a; }
+.empty-state { padding: 1rem; border: 1px solid #c7d2dc; border-radius: 8px; background: #fff; }
+
+/* Форма-макет */
+.form-field { display: grid; gap: 6px; margin-block: 16px; max-width: 36rem; }
+.form-field label { font-weight: 600; }
+.form-field input, .form-field textarea { width: 100%; padding: 10px; border: 1px solid #687d8d; border-radius: 6px; font: inherit; }
+.form-field textarea { resize: vertical; }
+.field-hint { margin: 0; color: #455b6b; }
+.form-actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.app-button { padding: 10px 16px; border: 1px solid #2f6f4f; border-radius: 6px; font: inherit; cursor: pointer; }
+.app-button-primary { background: #2f6f4f; color: #fff; }
+.app-button-secondary { background: #fff; color: #2f6f4f; }
+.app-button:disabled { opacity: 0.65; cursor: default; }
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #0b57a4; outline-offset: 3px; }
