@@ -1,21 +1,27 @@
 import PeakCard from './PeakCard.jsx'
 import EmptyState from '../ui/EmptyState.jsx'
 
-// peaks — обов'язковий масив. Порожній масив — допустиме значення.
-function PeakList({ peaks }) {
+// Список лише передає вибір униз і callback до карток.
+// peaks — обов'язковий масив; порожній масив допустимий.
+function PeakList({
+  peaks,
+  selectedId,
+  onSelect,
+  emptyTitle = 'Вершини ще не додано.',
+}) {
   if (peaks.length === 0) {
-    return (
-      <EmptyState title="Вершини ще не додано.">
-        <p>Після наповнення каталогу тут з’являться картки вершин.</p>
-      </EmptyState>
-    )
+    return <EmptyState title={emptyTitle} />
   }
 
   return (
     <ul className="peak-grid">
       {peaks.map((peak) => (
         <li key={peak.id}>
-          <PeakCard peak={peak} />
+          <PeakCard
+            peak={peak}
+            selected={peak.id === selectedId}
+            onSelect={onSelect}
+          />
         </li>
       ))}
     </ul>

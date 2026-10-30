@@ -34,3 +34,16 @@ section { margin-bottom: 32px; }
 .app-button-secondary { background: #fff; color: #2f6f4f; }
 .app-button:disabled { opacity: 0.65; cursor: default; }
 a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #0b57a4; outline-offset: 3px; }
+
+/* Стан і взаємодія */
+.catalog-filters { margin-block: 16px; }
+.checkbox-field { display: flex; align-items: center; gap: 8px; margin-block: 16px; }
+.checkbox-field input { width: auto; }
+.peak-card.selected { border-color: #2f6f4f; box-shadow: 0 0 0 2px #2f6f4f; background: #f0f8f3; }
+.peak-card p { margin: 8px 0; }
+.selection-note { font-weight: 600; color: #1f6b3a; }
+button[aria-pressed="true"] { outline: 2px solid #172b3a; outline-offset: 3px; }
+.plan-summary { margin-block: 24px; padding: 16px; background: #fff; border: 1px solid #d5e0da; border-radius: 8px; max-width: 36rem; }
+.plan-summary h3 { margin-top: 0; }
+.plan-summary dt { font-weight: 600; margin-top: 8px; }
+.plan-summary dd { margin: 0; overflow-wrap: anywhere; }

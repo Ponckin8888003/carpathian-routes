@@ -1,17 +1,42 @@
+import { useState } from 'react'
 import RoutesBadge from './RoutesBadge.jsx'
+import AppButton from '../ui/AppButton.jsx'
 
-// Подання однієї вершини. peak — коректний запис із src/data/peaks.js.
-function PeakCard({ peak }) {
+// Картка однієї вершини.
+// detailsOpen — локальний стан картки; selected приходить ззовні,
+// а про вибір картка лише повідомляє через onSelect(id).
+function PeakCard({ peak, selected, onSelect }) {
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const descriptionId = `peak-${peak.id}-description`
+
   return (
-    <article className="peak-card">
+    <article className={selected ? 'peak-card selected' : 'peak-card'}>
       <h3>{peak.name}</h3>
       <p className="meta">
         {peak.heightM} м · {peak.massif}
       </p>
-      <p>{peak.description}</p>
       <p>
         <RoutesBadge hasRoutes={peak.hasRoutes} />
       </p>
+
+      <AppButton
+        variant="secondary"
+        aria-expanded={detailsOpen}
+        aria-controls={descriptionId}
+        onClick={() => setDetailsOpen((previous) => !previous)}
+      >
+        {detailsOpen ? 'Згорнути опис' : 'Показати опис'}
+      </AppButton>
+      <p id={descriptionId} hidden={!detailsOpen}>
+        {peak.description}
+      </p>
+
+      <p>
+        <AppButton aria-pressed={selected} onClick={() => onSelect(peak.id)}>
+          Вибрати «{peak.name}»
+        </AppButton>
+      </p>
+      {selected && <p className="selection-note">Обрано для плану походу.</p>}
     </article>
   )
 }
