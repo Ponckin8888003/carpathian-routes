@@ -1,145 +1,106 @@
 # Компонентна архітектура «Карпатські маршрути»
 
-## Ієрархія
+## Маршрути й компонування
 
 ```text
-App
-  AppLayout
-    SiteHeader
-      MainNav
-    main
-      PeakSelectionProvider            (власник вибору вершини)
-        CatalogContainer               (читає контекст → props)
-          HomePage                     (власник фільтрів через usePeakFilters)
-            Section (Про сервіс)
-            Section (Вершини)
-              CatalogSummary
-              PeakFilters
-              PeakList
-                PeakCard (для кожної вершини; локальний detailsOpen)
-                  RoutesBadge
-                  AppButton
-                EmptyState (якщо нічого не знайдено)
-        PlanContainer                  (читає контекст → props, key=selectedId)
-          PlanPage                     (власник чернетки draft)
-            Section (Підготовка плану походу)
-              RoutesBadge
-              TripPlanForm
-                FormField (для кожного поля)
-                AppButton
-              TripPlanSummary
-              AppButton (скасувати вибір)
-              EmptyState (якщо вершину не вибрано)
-    footer
+BrowserRouter (main.jsx)
+  App → Routes
+    AppLayout (Outlet; PeakSelectionProvider)
+      HomePage                          /
+      CatalogContainer → PeakListPage   /peaks
+      PeakDetailsPage                   /peaks/:peakId
+      PlansLayout (Outlet)              /plans
+        PlansPage                       /plans
+        PlanCreatePage → PlanPage       /plans/new?peakId=...
+        PlanEditPage → PlanPage         /plans/:planId/edit
+      NotFoundPage                      *
 ```
 
-Провайдер охоплює лише робочу область: `SiteHeader`, `MainNav` і підвал вибору
-не потребують.
+`AppLayout` містить заголовок із меню (`SiteHeader`, `MainNav` на `NavLink`),
+один `main` і підвал. Провайдер вибору розташований у `main` над `Outlet`, тому
+вибір переживає клієнтські переходи між сторінками. `PlansLayout` додає лише
+спільне меню розділу планів. Кожна сторінка має власний `h1` через `PageHeading`,
+який також задає `document.title`.
 
 ## Структура каталогів
 
 ```text
 src/
   components/
-    layout/      AppLayout, SiteHeader
+    layout/      AppLayout, SiteHeader, PlansLayout
     navigation/  MainNav
     peaks/       PeakCard, PeakList, PeakFilters, RoutesBadge, CatalogSummary
     plans/       TripPlanForm, TripPlanSummary
-    ui/          Section, EmptyState, AppButton, FormField
+    ui/          Section, EmptyState, AppButton, FormField, PageHeading
   context/       PeakSelectionContext.js
   hooks/         usePeakFilters.js, usePeakSelection.js
   providers/     PeakSelectionProvider.jsx
-  data/          peaks.js
-  pages/         HomePage, PlanPage, CatalogContainer, PlanContainer
+  data/          peaks.js, plans.js
+  pages/         HomePage, PeakListPage, CatalogContainer, PeakDetailsPage,
+                 PlansPage, PlanPage, PlanCreatePage, PlanEditPage, NotFoundPage
 ```
 
-## Карта стану
+## Де зберігається стан
 
-| Значення | Природа | Початково | Власник | Споживачі | Скидання |
-| --- | --- | --- | --- | --- | --- |
-| `peaks` | Предметні дані | Масив із `peaks.js` | Модуль даних, передається з `App` | HomePage, провайдер | — |
-| `detailsOpen` | Локальний стан UI | `false` | Конкретна `PeakCard` | Ця картка | Зникає при демонтуванні картки |
-| `query`, `routesOnly` | Стан UI каталогу | `''`, `false` | `HomePage` (через `usePeakFilters`) | PeakFilters, список | Кнопка «Скинути фільтри» |
-| `selectedId` | Спільний стан вибору | `null` | `PeakSelectionProvider` | Каталог і сторінка плану | «Скасувати вибір» |
-| `draft` | Незбережена чернетка | порожні поля | `PlanPage` | TripPlanForm, TripPlanSummary | «Очистити поля», зміна вершини |
-| `visiblePeaks` | Похідне | обчислюється | — | PeakList, лічильник | — |
-| `selectedPeak` | Похідне | пошук за `selectedId` у повному масиві | — | PlanContainer | — |
+| Значення | Де зберігається | Після перезавантаження |
+| --- | --- | --- |
+| Відкрита сторінка та її ідентифікатор | Шлях URL (`/peaks/:peakId`, `/plans/:planId/edit`) | Відновлюється з адреси |
+| Пошук і фільтр «Лише з маршрутами» | Query parameters (`q`, `routes`) | Відновлюються з адреси |
+| Вершина нового плану | `peakId` у query parameters | Визначається з адреси |
+| Останній явний вибір вершини | `PeakSelectionProvider` (Context API) | Скидається |
+| Введення у формі (`draft`) | Локальний стан `PlanPage` | Скидається |
+| `detailsOpen` картки | Локальний стан `PeakCard` | Скидається |
+| `visiblePeaks`, `selectedPeak` | Обчислюються | — |
 
-Окремих `useState` для `visiblePeaks`, `selectedPeak`, кількості результатів і
-тексту підсумку немає: вони обчислюються під час відображення.
+Перегляд прямого посилання не залежить від історії вибору: деталі й редактор
+визначаються адресою, а контекст зберігає лише останню дію користувача.
 
 ## Контракти компонентів
 
 | Компонент | Вхідні властивості | Домовленість |
 | --- | --- | --- |
-| AppLayout | title, links, children | Спільна оболонка з одним `main` |
-| Section | id, title, children | `id` унікальний у документі |
-| AppButton | children, type, variant, disabled, onClick, aria-* | `variant`: primary або secondary |
+| AppLayout | peaks | Оболонка з `Outlet` і провайдером вибору |
+| MainNav | links | Пункти `{ to, label, end }`; активний пункт має `aria-current="page"` |
+| PageHeading | title | Єдиний `h1` сторінки та власник `document.title` |
 | PeakList | peaks, selectedId, onSelect, emptyTitle | Масив; порожній масив допустимий |
-| PeakCard | peak, selected, onSelect | `selected` приходить ззовні; `detailsOpen` локальний |
-| PeakFilters | query, routesOnly, onQueryChange, onRoutesOnlyChange, onReset | Керовані поля, стану не зберігає |
-| HomePage | peaks, selectedId, onSelect | Власник фільтрів |
-| PlanPage | peak, onClearSelection | `peak` може бути `undefined`; власник `draft` |
-| TripPlanForm | idPrefix, peakName, draft, onDateChange, onNotesChange, onNeedsAdviceChange, onReset | Керована форма без власного стану |
-| TripPlanSummary | peakName, draft | Читає той самий `draft` |
+| PeakCard | peak, selected, onSelect | Заголовок — посилання на `/peaks/:peakId`, кнопка вибирає |
+| PeakListPage | peaks, selectedId, onSelect | Фільтри читаються з URL через `usePeakFilters` |
+| PeakDetailsPage | peaks | Вершину шукає за `useParams`; відсутня → `NotFoundPage` |
+| PlansPage | plans, peaks | Посилання на редагування відносні: `{planId}/edit` |
+| PlanCreatePage | peaks | Вершину задає `?peakId=`; без параметра — пояснення |
+| PlanEditPage | plans, peaks | План за `planId`, вершина за `plan.peakId` |
+| PlanPage | title, peak, initialDraft, onCancel, cancelLabel | Спільний редактор; `peak` завжди коректний, URL не читає |
+| TripPlanForm | idPrefix, peakName, draft, on…Change, onReset | Керована форма без власного стану |
+| NotFoundPage | title, message | Невідомий маршрут і відсутній запис |
 
-## Контракти подій
+## Правила переходів і часу існування
 
-| Подія | Відправник | Власник стану | Зміна |
-| --- | --- | --- | --- |
-| `onSelect(id)` | PeakCard | PeakSelectionProvider | `selectedId = id` (якщо id відомий) |
-| `onQueryChange(text)` | PeakFilters | HomePage | `query` |
-| `onRoutesOnlyChange(flag)` | PeakFilters | HomePage | `routesOnly` |
-| `onReset()` | PeakFilters | HomePage | скидає обидва фільтри, вибір не чіпає |
-| `onDateChange(text)` | TripPlanForm | PlanPage | `draft.date` |
-| `onNotesChange(text)` | TripPlanForm | PlanPage | `draft.notes` |
-| `onNeedsAdviceChange(flag)` | TripPlanForm | PlanPage | `draft.needsAdvice` |
-| `onReset()` | TripPlanForm | PlanPage | порожній `draft`, вибір зберігається |
-| `onClearSelection()` | PlanPage | PeakSelectionProvider | `selectedId = null` |
+- Каталог читає фільтри з URL; введення тексту використовує `replace`, щоб кожна
+  літера не створювала запис в історії. Перемикання прапорця й скидання фільтрів
+  створюють окремі переходи. Пункт меню «Вершини» відкриває каталог без параметрів.
+- `PlanCreatePage` і `PlanEditPage` задають `key` (`new-{id}`, `edit-{id}`) на
+  `PlanPage`: інша вершина або інший запис створює новий стан редактора.
+- Вихід із редактора демонтує `PlanPage`, тому чернетка зникає. Повторне
+  відкриття запису знову показує дані з `data/plans.js`.
+- «Скасувати чернетку й очистити вибір» очищує вибір і виконує
+  `navigate('/peaks', { replace: true })`.
+- Розгортання описів карток не відновлюється після переходу: компоненти демонтуються.
+- Невідомий маршрут (`*`) і відсутній запис за відомим шаблоном
+  (`/peaks/missing`) обробляються окремо; в обох випадках є заголовок і посилання
+  для продовження.
 
-## Правила часу існування
+## Прямі адреси та хостинг
 
-- Чернетка належить `PlanPage`. `PlanContainer` задає `key={selectedId ?? 'empty'}`:
-  вибір іншої вершини або скасування вибору створює нову порожню чернетку.
-  Повторний вибір тієї самої вершини чернетку не змінює.
-- Фільтри не змінюють `selectedId`, тому приховання вибраної картки не скасовує
-  вибір і не очищує чернетку. Локальний `detailsOpen` прихованої картки зникає.
-- Після перезавантаження сторінки вибір, фільтри й чернетка повертаються до
-  початкових значень: збереження ще не реалізовано.
-- Чернетка не є збереженим планом і нічого не резервує.
-
-## Ефект
-
-`PlanPage` синхронізує `document.title` із вибраною вершиною. Залежність ефекту —
-`title`; очищення відновлює попередній заголовок. Редагування полів чернетки
-заголовок не змінює.
-
-## Context API
-
-Контекст містить лише вибір (`selectedId`, `selectedPeak`, `selectPeak`,
-`clearSelection`). Фільтри, `detailsOpen` і `draft` залишаються в своїх
-власників. Компоненти подання (картка, форма) контекст не читають: його адаптують
-до props `CatalogContainer` і `PlanContainer`.
-
-## Засоби керування станом
-
-| Потреба | Засіб | Обґрунтування |
-| --- | --- | --- |
-| Розгортання опису | Локальний `useState` | Потрібне одній картці |
-| Пошук і фільтр маршрутів | Стан сторінки + власний хук | Потрібні фільтрам і списку одного сценарію |
-| Поля та підсумок чернетки | Підняття до `PlanPage` | Два сусідні компоненти бачать один об’єкт |
-| Вибір вершини | Обмежений Context API | Один ідентифікатор узгоджує каталог і план |
-| Видимі вершини, лічильники | Звичайні обчислення | Залежать від даних і фільтрів |
-| Заголовок вкладки | `useEffect` | Синхронізація із зовнішньою властивістю браузера |
-
-Для двох близьких гілок вистачило б підняття вибору до `App` через props;
-контекст залишено як обґрунтований навчальний варіант із чіткою областю.
+У режимі розроблення й `npm run preview` Vite повертає `index.html` для клієнтських
+маршрутів. На майбутньому хостингу сервер статичних файлів має повертати
+`index.html` для адрес на кшталт `/plans/plan-001/edit`, зберігаючи коректну видачу
+статичних ресурсів. Застосунок розрахований на розміщення в корені сайту.
 
 ## Ключові рішення
 
 1. **RoutesBadge** містить єдине правило підпису про наявність маршрутів.
-2. **Section через children** задає заголовок і обрамлення, вміст визначає сторінка.
-3. **PeakList окремо від PeakCard:** список відповідає за повторення й порожній
-   результат, картка — за одну вершину та її локальне розгортання.
-4. **Оформлення:** власні стилі в `src/index.css`, бібліотеку React Bootstrap
-   не підключено; контракт `AppButton` дозволяє замінити його реалізацію.
+2. **Фільтри в URL** без дублювання у `useState`: адресу каталогу можна скопіювати.
+3. **Спільний редактор PlanPage** використовується для створення й редагування;
+   маршрутні сторінки перевіряють запис і передають його редактору.
+4. **Провайдер вибору в AppLayout:** один власник вибору, що переживає переходи.
+5. **Оформлення:** власні стилі в `src/index.css`, React Bootstrap не підключено.

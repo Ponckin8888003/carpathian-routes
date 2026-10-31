@@ -1,15 +1,26 @@
+import { Outlet } from 'react-router'
 import SiteHeader from './SiteHeader.jsx'
+import PeakSelectionProvider from '../../providers/PeakSelectionProvider.jsx'
 
-// Спільна оболонка: заголовок, один main (вміст через children), підвал.
-function AppLayout({ title, links, children }) {
+const navigationLinks = [
+  { to: '/', label: 'Головна', end: true },
+  { to: '/peaks', label: 'Вершини' },
+  { to: '/plans', label: 'Плани походів' },
+]
+
+// Спільна оболонка. Сторінки показуються в Outlet.
+// Провайдер вибору розташований тут, тому вибір переживає переходи між сторінками.
+function AppLayout({ peaks }) {
   return (
     <>
       <a className="skip-link" href="#main-content">
         Перейти до вмісту
       </a>
-      <SiteHeader title={title} links={links} />
+      <SiteHeader title="Карпатські маршрути" links={navigationLinks} />
       <main id="main-content" tabIndex={-1}>
-        {children}
+        <PeakSelectionProvider peaks={peaks}>
+          <Outlet />
+        </PeakSelectionProvider>
       </main>
       <footer className="footer">Навчальний проєкт · ІФНТУНГ</footer>
     </>

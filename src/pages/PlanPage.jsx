@@ -1,28 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import PageHeading from '../components/ui/PageHeading.jsx'
 import Section from '../components/ui/Section.jsx'
-import EmptyState from '../components/ui/EmptyState.jsx'
 import AppButton from '../components/ui/AppButton.jsx'
 import RoutesBadge from '../components/peaks/RoutesBadge.jsx'
 import TripPlanForm from '../components/plans/TripPlanForm.jsx'
 import TripPlanSummary from '../components/plans/TripPlanSummary.jsx'
 
-function createEmptyDraft() {
-  return { date: '', notes: '', needsAdvice: false }
-}
+const emptyDraft = { date: '', notes: '', needsAdvice: false }
 
-// PlanPage — власник чернетки: форма й підсумок бачать один об'єкт draft.
-function PlanPage({ peak, onClearSelection }) {
-  const [draft, setDraft] = useState(createEmptyDraft)
-  const title = peak ? `Карпатські маршрути: ${peak.name}` : 'Карпатські маршрути'
-
-  // Синхронізація із зовнішньою системою: заголовок вкладки браузера.
-  useEffect(() => {
-    const previousTitle = document.title
-    document.title = title
-    return () => {
-      document.title = previousTitle
-    }
-  }, [title])
+// Спільний редактор чернетки. Маршрутні сторінки передають перевірену вершину,
+// початкові поля та дію виходу; URL редактор не читає.
+function PlanPage({
+  title,
+  peak,
+  initialDraft = emptyDraft,
+  onCancel,
+  cancelLabel = 'Вийти без збереження',
+}) {
+  const [draft, setDraft] = useState(() => ({ ...initialDraft }))
 
   function handleDateChange(date) {
     setDraft((previous) => ({ ...previous, date }))
@@ -37,41 +32,31 @@ function PlanPage({ peak, onClearSelection }) {
   }
 
   function handleReset() {
-    setDraft(createEmptyDraft())
-  }
-
-  // Хуки викликано вище, тому умовне повернення порядок хуків не змінює.
-  if (!peak) {
-    return (
-      <Section id="plan" title="Підготовка плану походу">
-        <EmptyState title="Вершину ще не вибрано.">
-          <p>
-            <a href="#peaks">Виберіть вершину в каталозі</a>
-          </p>
-        </EmptyState>
-      </Section>
-    )
+    setDraft({ ...emptyDraft })
   }
 
   return (
-    <Section id="plan" title="Підготовка плану походу">
-      <p>
-        Обрано «{peak.name}»: <RoutesBadge hasRoutes={peak.hasRoutes} />
-      </p>
-      <TripPlanForm
-        idPrefix="plan-draft"
-        peakName={peak.name}
-        draft={draft}
-        onDateChange={handleDateChange}
-        onNotesChange={handleNotesChange}
-        onNeedsAdviceChange={handleNeedsAdviceChange}
-        onReset={handleReset}
-      />
-      <TripPlanSummary peakName={peak.name} draft={draft} />
-      <AppButton variant="secondary" onClick={onClearSelection}>
-        Скасувати вибір і очистити чернетку
+    <>
+      <PageHeading title={title} />
+      <Section id="plan-editor" title="Поля та підсумок">
+        <p>
+          Вершина «{peak.name}»: <RoutesBadge hasRoutes={peak.hasRoutes} />
+        </p>
+        <TripPlanForm
+          idPrefix="plan-draft"
+          peakName={peak.name}
+          draft={draft}
+          onDateChange={handleDateChange}
+          onNotesChange={handleNotesChange}
+          onNeedsAdviceChange={handleNeedsAdviceChange}
+          onReset={handleReset}
+        />
+        <TripPlanSummary peakName={peak.name} draft={draft} />
+      </Section>
+      <AppButton variant="secondary" onClick={onCancel}>
+        {cancelLabel}
       </AppButton>
-    </Section>
+    </>
   )
 }
 

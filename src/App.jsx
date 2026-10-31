@@ -1,23 +1,36 @@
+import { Route, Routes } from 'react-router'
 import AppLayout from './components/layout/AppLayout.jsx'
-import PeakSelectionProvider from './providers/PeakSelectionProvider.jsx'
+import PlansLayout from './components/layout/PlansLayout.jsx'
+import HomePage from './pages/HomePage.jsx'
 import CatalogContainer from './pages/CatalogContainer.jsx'
-import PlanContainer from './pages/PlanContainer.jsx'
+import PeakDetailsPage from './pages/PeakDetailsPage.jsx'
+import PlansPage from './pages/PlansPage.jsx'
+import PlanCreatePage from './pages/PlanCreatePage.jsx'
+import PlanEditPage from './pages/PlanEditPage.jsx'
+import NotFoundPage from './pages/NotFoundPage.jsx'
 import { peaks } from './data/peaks.js'
-
-const navigationLinks = [
-  { href: '#about', label: 'Про сервіс' },
-  { href: '#peaks', label: 'Вершини' },
-  { href: '#plan', label: 'План походу' },
-]
+import { plans } from './data/plans.js'
 
 function App() {
   return (
-    <AppLayout title="Карпатські маршрути" links={navigationLinks}>
-      <PeakSelectionProvider peaks={peaks}>
-        <CatalogContainer peaks={peaks} />
-        <PlanContainer />
-      </PeakSelectionProvider>
-    </AppLayout>
+    <Routes>
+      <Route element={<AppLayout peaks={peaks} />}>
+        <Route index element={<HomePage />} />
+        <Route path="peaks">
+          <Route index element={<CatalogContainer peaks={peaks} />} />
+          <Route path=":peakId" element={<PeakDetailsPage peaks={peaks} />} />
+        </Route>
+        <Route path="plans" element={<PlansLayout />}>
+          <Route index element={<PlansPage plans={plans} peaks={peaks} />} />
+          <Route path="new" element={<PlanCreatePage peaks={peaks} />} />
+          <Route
+            path=":planId/edit"
+            element={<PlanEditPage plans={plans} peaks={peaks} />}
+          />
+        </Route>
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   )
 }
 

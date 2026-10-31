@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router'
 import RoutesBadge from './RoutesBadge.jsx'
 import AppButton from '../ui/AppButton.jsx'
 
@@ -11,7 +12,9 @@ function PeakCard({ peak, selected, onSelect }) {
 
   return (
     <article className={selected ? 'peak-card selected' : 'peak-card'}>
-      <h3>{peak.name}</h3>
+      <h3>
+        <Link to={`/peaks/${encodeURIComponent(peak.id)}`}>{peak.name}</Link>
+      </h3>
       <p className="meta">
         {peak.heightM} м · {peak.massif}
       </p>
