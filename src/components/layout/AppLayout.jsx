@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router'
 import SiteHeader from './SiteHeader.jsx'
 import PeakSelectionProvider from '../../providers/PeakSelectionProvider.jsx'
+import PlansProvider from '../../providers/PlansProvider.jsx'
 
 const navigationLinks = [
   { to: '/', label: 'Головна', end: true },
@@ -9,8 +10,9 @@ const navigationLinks = [
 ]
 
 // Спільна оболонка. Сторінки показуються в Outlet.
-// Провайдер вибору розташований тут, тому вибір переживає переходи між сторінками.
-function AppLayout({ peaks }) {
+// Провайдери розташовані тут, тому вибір вершини й колекція планів
+// переживають переходи між сторінками.
+function AppLayout({ peaks, initialPlans }) {
   return (
     <>
       <a className="skip-link" href="#main-content">
@@ -19,7 +21,9 @@ function AppLayout({ peaks }) {
       <SiteHeader title="Карпатські маршрути" links={navigationLinks} />
       <main id="main-content" tabIndex={-1}>
         <PeakSelectionProvider peaks={peaks}>
-          <Outlet />
+          <PlansProvider initialPlans={initialPlans} peaks={peaks}>
+            <Outlet />
+          </PlansProvider>
         </PeakSelectionProvider>
       </main>
       <footer className="footer">Навчальний проєкт · ІФНТУНГ</footer>

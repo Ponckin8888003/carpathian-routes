@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router'
+import PlanNotice from '../plans/PlanNotice.jsx'
 
 // Вкладена оболонка розділу «Плани походів»: спільне меню для списку й форм.
 function PlansLayout() {
@@ -16,6 +17,8 @@ function PlansLayout() {
           </li>
         </ul>
       </nav>
+      <p>Локальні дані зберігаються до перезавантаження сторінки.</p>
+      <PlanNotice />
       <Outlet />
     </>
   )

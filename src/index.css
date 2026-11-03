@@ -59,3 +59,21 @@ button[aria-pressed="true"] { outline: 2px solid #172b3a; outline-offset: 3px; }
 .plans-table th, .plans-table td { padding: 10px; border: 1px solid #c7d2dc; text-align: left; vertical-align: top; }
 .plans-table caption { text-align: left; margin-block: 12px; }
 main a { color: #2f6f4f; }
+
+/* Форми, перевірка й операції */
+.field-error { margin: 0; color: #9c1c24; font-weight: 600; }
+[aria-invalid="true"] { border-color: #9c1c24 !important; }
+.form-field select { width: 100%; padding: 10px; border: 1px solid #687d8d; border-radius: 6px; font: inherit; background: #fff; }
+select:focus-visible { outline: 3px solid #0b57a4; outline-offset: 3px; }
+.form-field .checkbox-field { margin-block: 0; }
+.operation-notice { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-block: 16px; padding: 12px 16px; background: #e6f2ea; border: 1px solid #2f6f4f; border-radius: 8px; }
+.row-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.plans-table td { overflow-wrap: anywhere; }
+.plan-details { max-width: 36rem; padding: 16px; background: #fff; border: 1px solid #d5e0da; border-radius: 8px; }
+.plan-details dt { font-weight: 600; margin-top: 8px; }
+.plan-details dt:first-child { margin-top: 0; }
+.plan-details dd { margin: 0; overflow-wrap: anywhere; }
+.link-button { display: inline-block; text-decoration: none; }
+main a.link-button { color: #fff; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+main h1 { overflow-wrap: anywhere; }

@@ -1,13 +1,23 @@
 import { Link } from 'react-router'
 import PageHeading from '../components/ui/PageHeading.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
+import PlanFilters from '../components/plans/PlanFilters.jsx'
+import PlansTable from '../components/plans/PlansTable.jsx'
+import usePlans from '../hooks/usePlans.js'
+import usePlanFilters from '../hooks/usePlanFilters.js'
+import useDeletePlan from '../hooks/useDeletePlan.js'
 
-// Список локальних демонстраційних планів. Посилання відносні: /plans/{id}/edit.
-function PlansPage({ plans, peaks }) {
+// Список планів: колекцію дає контекст, умови списку — адреса.
+function PlansPage({ peaks }) {
+  const { plans } = usePlans()
+  const filters = usePlanFilters(plans, peaks)
+  const confirmAndDelete = useDeletePlan()
+
   return (
     <>
       <PageHeading title="Плани походів" />
-      <p>Нижче наведено локальні демонстраційні записи.</p>
+      <p>Створюйте, переглядайте, редагуйте та видаляйте плани походів.</p>
+
       {plans.length === 0 ? (
         <EmptyState title="Планів ще немає.">
           <p>
@@ -15,36 +25,30 @@ function PlansPage({ plans, peaks }) {
           </p>
         </EmptyState>
       ) : (
-        <div className="table-scroll">
-          <table className="plans-table">
-            <caption>Плани для перевірки навігації</caption>
-            <thead>
-              <tr>
-                <th scope="col">Вершина</th>
-                <th scope="col">Дата</th>
-                <th scope="col">Нотатки</th>
-                <th scope="col">Дія</th>
-              </tr>
-            </thead>
-            <tbody>
-              {plans.map((plan) => {
-                const peak = peaks.find((entry) => entry.id === plan.peakId)
-                return (
-                  <tr key={plan.id}>
-                    <td>{peak?.name ?? 'Вершина відсутня в каталозі'}</td>
-                    <td>{plan.date}</td>
-                    <td>{plan.notes}</td>
-                    <td>
-                      <Link to={`${encodeURIComponent(plan.id)}/edit`}>
-                        Редагувати {plan.id}
-                      </Link>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          <PlanFilters
+            query={filters.query}
+            advice={filters.advice}
+            sort={filters.sort}
+            onQueryChange={filters.setQuery}
+            onAdviceChange={filters.setAdvice}
+            onSortChange={filters.setSort}
+            onReset={filters.resetFilters}
+          />
+          <p aria-live="polite">
+            Показано: {filters.visiblePlans.length} із {plans.length}
+          </p>
+          {filters.visiblePlans.length === 0 ? (
+            <EmptyState title="За цими умовами планів немає.">
+              <p>Змініть пошук або скиньте умови.</p>
+            </EmptyState>
+          ) : (
+            <PlansTable
+              rows={filters.visiblePlans}
+              onDelete={(row) => confirmAndDelete(row, row.peakName)}
+            />
+          )}
+        </>
       )}
     </>
   )

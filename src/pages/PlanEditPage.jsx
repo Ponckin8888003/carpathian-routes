@@ -1,11 +1,13 @@
 import { useNavigate, useParams } from 'react-router'
 import PlanPage from './PlanPage.jsx'
 import NotFoundPage from './NotFoundPage.jsx'
+import usePlans from '../hooks/usePlans.js'
 
-// /plans/:planId/edit — запис і вершину визначають адреса та зв'язок peakId.
-function PlanEditPage({ plans, peaks }) {
+// /plans/:planId/edit — запис шукаємо в колекції з контексту.
+function PlanEditPage({ peaks }) {
   const { planId } = useParams()
   const navigate = useNavigate()
+  const { plans, updatePlan } = usePlans()
   const plan = plans.find((entry) => entry.id === planId)
 
   if (!plan) {
@@ -23,22 +25,34 @@ function PlanEditPage({ plans, peaks }) {
     return (
       <NotFoundPage
         title="Вершина плану відсутня"
-        message="Демонстраційний запис посилається на відсутню вершину."
+        message="План посилається на вершину, якої немає в каталозі."
       />
     )
+  }
+
+  const detailsPath = `/plans/${encodeURIComponent(plan.id)}`
+
+  function handleSave(value) {
+    const result = updatePlan(plan.id, value)
+    if (result.ok) navigate(detailsPath)
+    return result
   }
 
   return (
     <PlanPage
       key={`edit-${plan.id}`}
-      title={`Редагування плану ${plan.id}`}
+      title="Редагування плану"
       peak={peak}
       initialDraft={{
         date: plan.date,
+        durationDays: String(plan.durationDays),
         notes: plan.notes,
         needsAdvice: plan.needsAdvice,
       }}
-      onCancel={() => navigate('/plans')}
+      submitLabel="Зберегти зміни"
+      onSave={handleSave}
+      onCancel={() => navigate(detailsPath)}
+      cancelLabel="Скасувати та повернутися до плану"
     />
   )
 }
