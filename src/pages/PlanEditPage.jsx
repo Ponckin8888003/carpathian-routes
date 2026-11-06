@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import PlanPage from './PlanPage.jsx'
 import NotFoundPage from './NotFoundPage.jsx'
@@ -9,6 +10,18 @@ function PlanEditPage({ peaks }) {
   const navigate = useNavigate()
   const { plans, updatePlan } = usePlans()
   const plan = plans.find((entry) => entry.id === planId)
+
+  // Відповідь старого редактора не має переспрямувати з іншого плану.
+  const pageAlive = useRef(false)
+  const activeId = useRef(planId)
+  useEffect(() => {
+    pageAlive.current = true
+    activeId.current = planId
+    return () => {
+      pageAlive.current = false
+      activeId.current = null
+    }
+  }, [planId])
 
   if (!plan) {
     return (
@@ -32,9 +45,11 @@ function PlanEditPage({ peaks }) {
 
   const detailsPath = `/plans/${encodeURIComponent(plan.id)}`
 
-  function handleSave(value) {
-    const result = updatePlan(plan.id, value)
-    if (result.ok) navigate(detailsPath)
+  async function handleSave(value) {
+    const result = await updatePlan(plan.id, value)
+    if (result.ok && pageAlive.current && activeId.current === plan.id) {
+      navigate(detailsPath, { replace: true })
+    }
     return result
   }
 

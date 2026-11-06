@@ -1,7 +1,15 @@
 import { NavLink, Outlet } from 'react-router'
 import PlanNotice from '../plans/PlanNotice.jsx'
+import PlansGate from '../plans/PlansGate.jsx'
+import { dataSource } from '../../services/planService.js'
 
-// Вкладена оболонка розділу «Плани походів»: спільне меню для списку й форм.
+const storageNote =
+  dataSource === 'api'
+    ? 'Плани зберігаються у зовнішньому сервісі.'
+    : 'Плани зберігаються локально в цьому браузері та лишаються після перезавантаження.'
+
+// Вкладена оболонка розділу «Плани походів»: меню, пояснення про джерело даних,
+// повідомлення про результат і обмежувач станів читання.
 function PlansLayout() {
   return (
     <>
@@ -17,9 +25,11 @@ function PlansLayout() {
           </li>
         </ul>
       </nav>
-      <p>Локальні дані зберігаються до перезавантаження сторінки.</p>
+      <p className="storage-note">{storageNote}</p>
       <PlanNotice />
-      <Outlet />
+      <PlansGate>
+        <Outlet />
+      </PlansGate>
     </>
   )
 }

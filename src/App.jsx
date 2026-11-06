@@ -10,12 +10,11 @@ import PlanEditPage from './pages/PlanEditPage.jsx'
 import PlanDetailsPage from './pages/PlanDetailsPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import { peaks } from './data/peaks.js'
-import { plans } from './data/plans.js'
 
 function App() {
   return (
     <Routes>
-      <Route element={<AppLayout peaks={peaks} initialPlans={plans} />}>
+      <Route element={<AppLayout peaks={peaks} />}>
         <Route index element={<HomePage />} />
         <Route path="peaks">
           <Route index element={<CatalogContainer peaks={peaks} />} />

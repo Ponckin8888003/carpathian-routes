@@ -12,7 +12,7 @@ const navigationLinks = [
 // Спільна оболонка. Сторінки показуються в Outlet.
 // Провайдери розташовані тут, тому вибір вершини й колекція планів
 // переживають переходи між сторінками.
-function AppLayout({ peaks, initialPlans }) {
+function AppLayout({ peaks }) {
   return (
     <>
       <a className="skip-link" href="#main-content">
@@ -21,7 +21,7 @@ function AppLayout({ peaks, initialPlans }) {
       <SiteHeader title="Карпатські маршрути" links={navigationLinks} />
       <main id="main-content" tabIndex={-1}>
         <PeakSelectionProvider peaks={peaks}>
-          <PlansProvider initialPlans={initialPlans} peaks={peaks}>
+          <PlansProvider>
             <Outlet />
           </PlansProvider>
         </PeakSelectionProvider>

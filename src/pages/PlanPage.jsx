@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import PageHeading from '../components/ui/PageHeading.jsx'
 import Section from '../components/ui/Section.jsx'
 import AppButton from '../components/ui/AppButton.jsx'
@@ -31,6 +31,17 @@ function PlanPage({
   const [touched, setTouched] = useState({})
   const [attempted, setAttempted] = useState(false)
   const [operationError, setOperationError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  // ref блокує повторне подання одразу, ще до наступного рендеру
+  const submitting = useRef(false)
+  const alive = useRef(false)
+
+  useEffect(() => {
+    alive.current = true
+    return () => {
+      alive.current = false
+    }
+  }, [])
 
   const validation = validatePlan({ peakId: peak.id, ...draft }, [peak])
   // Помилку поля показуємо після виходу з поля або після спроби збереження.
@@ -52,9 +63,11 @@ function PlanPage({
     setTouched((previous) => ({ ...previous, [field]: true }))
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
+    if (submitting.current) return
     setAttempted(true)
+    setOperationError('')
 
     if (!validation.ok) {
       const firstInvalid = fieldOrder.find((field) => validation.errors[field])
@@ -62,13 +75,28 @@ function PlanPage({
       return
     }
 
-    const result = onSave(validation.value)
-    if (!result.ok) {
-      setOperationError(result.message ?? 'Не вдалося зберегти план.')
+    submitting.current = true
+    setIsSubmitting(true)
+    try {
+      // await на кожній межі: помилку аналізуємо лише після відповіді сервісу
+      const result = await onSave(validation.value)
+      if (!result.ok && alive.current) {
+        setOperationError(
+          result.errors
+            ? Object.values(result.errors).join(' ')
+            : result.message || 'Не вдалося зберегти план.',
+        )
+      }
+    } catch {
+      if (alive.current) setOperationError('Не вдалося завершити збереження.')
+    } finally {
+      submitting.current = false
+      if (alive.current) setIsSubmitting(false)
     }
   }
 
   function handleReset() {
+    if (submitting.current) return
     if (isDirty && !window.confirm('Скинути поля до початкових значень?')) return
     setDraft({ ...initialDraft })
     setTouched({})
@@ -77,6 +105,7 @@ function PlanPage({
   }
 
   function handleCancel() {
+    if (submitting.current) return
     if (isDirty && !window.confirm('Є незбережені зміни. Вийти без збереження?')) {
       return
     }
@@ -101,6 +130,7 @@ function PlanPage({
           errors={visibleErrors}
           formError={formError}
           submitLabel={submitLabel}
+          isSubmitting={isSubmitting}
           onChange={handleChange}
           onBlur={handleBlur}
           onSubmit={handleSubmit}
@@ -108,7 +138,11 @@ function PlanPage({
         />
         <TripPlanSummary peakName={peak.name} draft={draft} />
       </Section>
-      <AppButton variant="secondary" onClick={handleCancel}>
+      <AppButton
+        variant="secondary"
+        disabled={isSubmitting}
+        onClick={handleCancel}
+      >
         {cancelLabel}
       </AppButton>
     </>

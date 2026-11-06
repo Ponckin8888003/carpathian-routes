@@ -12,7 +12,7 @@ function PlanFilters({
   onReset,
 }) {
   return (
-    <div className="catalog-filters">
+    <div className="catalog-filters plan-filters">
       <FormField id="plans-query" label="Пошук за вершиною або нотатками">
         <input
           id="plans-query"

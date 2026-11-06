@@ -54,7 +54,7 @@ button[aria-pressed="true"] { outline: 2px solid #172b3a; outline-offset: 3px; }
 
 /* Маршрути: таблиця планів */
 .peak-card h3 a { color: inherit; }
-.table-scroll { overflow-x: auto; }
+.table-scroll { position: relative; overflow-x: auto; }
 .plans-table { width: 100%; border-collapse: collapse; background: #fff; }
 .plans-table th, .plans-table td { padding: 10px; border: 1px solid #c7d2dc; text-align: left; vertical-align: top; }
 .plans-table caption { text-align: left; margin-block: 12px; }
@@ -77,3 +77,34 @@ select:focus-visible { outline: 3px solid #0b57a4; outline-offset: 3px; }
 main a.link-button { color: #fff; }
 .visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 main h1 { overflow-wrap: anywhere; }
+
+/* Лабораторна 3.2: стани читання й запису, оформлення результатів */
+.storage-note { margin: 0 0 12px; color: #455b6b; font-size: 0.95rem; }
+.state-panel { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 32px 16px; margin-block: 16px; text-align: center; background: #fff; border: 1px solid #d5e0da; border-radius: 12px; }
+.state-panel p { margin: 0; }
+.state-panel-error { border-color: #9c1c24; background: #fdf3f3; }
+.spinner { width: 32px; height: 32px; border: 4px solid #d5e0da; border-top-color: #2f6f4f; border-radius: 50%; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-block: 16px; }
+.submit-status { min-height: 1.4em; margin: 8px 0 0; color: #455b6b; font-weight: 600; }
+.toolbar .submit-status { margin: 0; }
+.form-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.form-fieldset legend { padding: 0; margin-bottom: 4px; font-weight: 700; font-size: 1.1rem; }
+.form-fieldset:disabled { opacity: 0.75; }
+.app-button-danger { background: #fff; color: #9c1c24; border-color: #9c1c24; }
+.app-button:disabled { opacity: 0.55; cursor: not-allowed; }
+.badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.875rem; font-weight: 600; white-space: nowrap; }
+.badge-yes { background: #e6f2ea; color: #1f5b3a; border: 1px solid #2f6f4f; }
+.badge-no { background: #eef1f4; color: #455b6b; border: 1px solid #b5c1cb; }
+.plans-table tbody tr:nth-child(even) { background: #f7faf8; }
+.plans-table tbody tr:hover { background: #eef6f1; }
+.plans-table thead th { background: #e6f2ea; }
+.plan-filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 16px; align-items: end; padding: 8px 16px 16px; background: #fff; border: 1px solid #d5e0da; border-radius: 12px; }
+.plan-filters .form-field { max-width: none; }
+.plan-filters .app-button { justify-self: start; margin-bottom: 16px; }
+.result-count { font-weight: 600; color: #1f5b3a; }
+.operation-notice { border-left-width: 6px; }
+.dev-panel { margin-block: 16px; padding: 8px 16px; background: #fff8e1; border: 1px dashed #a07a00; border-radius: 8px; }
+.dev-panel summary { cursor: pointer; font-weight: 600; }
+.plan-details dd { margin-bottom: 4px; }

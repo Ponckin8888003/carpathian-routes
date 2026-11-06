@@ -9,6 +9,7 @@ function TripPlanForm({
   errors,
   formError,
   submitLabel,
+  isSubmitting,
   onChange,
   onBlur,
   onSubmit,
@@ -29,7 +30,14 @@ function TripPlanForm({
   }
 
   return (
-    <form aria-label="План походу" noValidate onSubmit={onSubmit}>
+    <form
+      aria-label="План походу"
+      aria-busy={isSubmitting}
+      noValidate
+      onSubmit={onSubmit}
+    >
+      <fieldset className="form-fieldset" disabled={isSubmitting}>
+      <legend>Дані плану</legend>
       {formError && (
         <p className="field-error" role="alert">
           {formError}
@@ -117,8 +125,14 @@ function TripPlanForm({
         <AppButton variant="secondary" onClick={onReset}>
           Скинути поля
         </AppButton>
-        <AppButton type="submit">{submitLabel}</AppButton>
+        <AppButton type="submit">
+          {isSubmitting ? 'Збереження…' : submitLabel}
+        </AppButton>
       </div>
+      </fieldset>
+      <p role="status" className="submit-status">
+        {isSubmitting ? 'Збереження плану…' : ''}
+      </p>
     </form>
   )
 }

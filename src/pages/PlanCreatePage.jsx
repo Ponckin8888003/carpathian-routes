@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import PageHeading from '../components/ui/PageHeading.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
@@ -13,6 +14,14 @@ function PlanCreatePage({ peaks }) {
   const { selectedId, clearSelection } = usePeakSelection()
   const { createPlan } = usePlans()
   const peakId = searchParams.get('peakId')
+  // ознака актуальності сторінки: до умовних повернень
+  const pageAlive = useRef(false)
+  useEffect(() => {
+    pageAlive.current = true
+    return () => {
+      pageAlive.current = false
+    }
+  }, [])
 
   if (peakId === null) {
     const lastSelectionSearch = selectedId
@@ -52,9 +61,9 @@ function PlanCreatePage({ peaks }) {
     navigate('/peaks', { replace: true })
   }
 
-  function handleSave(value) {
-    const result = createPlan(value)
-    if (result.ok) {
+  async function handleSave(value) {
+    const result = await createPlan(value)
+    if (result.ok && pageAlive.current) {
       // replace: кнопка «Назад» не поверне до порожньої форми
       navigate(`/plans/${encodeURIComponent(result.record.id)}`, { replace: true })
     }
