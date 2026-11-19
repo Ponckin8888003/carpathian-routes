@@ -5,6 +5,20 @@ export const ADVICE_REQUIRED_OVER_DAYS = 3
 export const NOTES_MIN = 10
 export const NOTES_MAX = 500
 
+// Дата має бути РРРР-ММ-ДД і існувати в календарі. Date.parse цього не гарантує:
+// "2026-02-30" він переносить на березень, а "March 5 2026" приймає як є.
+function isCalendarDate(text) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text)
+  if (!match) return false
+  const [year, month, day] = match.slice(1).map(Number)
+  const parsed = new Date(Date.UTC(year, month - 1, day))
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() === month - 1 &&
+    parsed.getUTCDate() === day
+  )
+}
+
 // input: { peakId, date, durationDays, notes, needsAdvice }.
 // durationDays може бути рядком із поля форми або вже числом.
 // Повертає { ok: false, errors } або { ok: true, errors: {}, value }.
@@ -18,8 +32,8 @@ export function validatePlan(input, peaks) {
   const date = String(input.date ?? '').trim()
   if (date === '') {
     errors.date = 'Вкажіть дату походу.'
-  } else if (Number.isNaN(Date.parse(date))) {
-    errors.date = 'Дата має бути коректною.'
+  } else if (!isCalendarDate(date)) {
+    errors.date = 'Дата має бути коректною: формат РРРР-ММ-ДД.'
   }
 
   // Number('') дорівнює 0, тому порожній рядок перевіряємо до перетворення.

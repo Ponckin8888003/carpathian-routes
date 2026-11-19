@@ -35,11 +35,12 @@ src/
                  PlansGate, AdviceBadge, MockFailurePanel (лише розроблення)
     ui/          Section, EmptyState, AppButton, FormField, PageHeading
   context/       PeakSelectionContext.js, PlansContext.js
-  domain/        planValidation.js
+  domain/        planValidation.js, selectPlans.js (+ *.test.js)
+  test/          setup.js, fixtures.js, deferred.js (лише для тестів)
   services/      ServiceError.js, planContract.js, mockPlanService.js,
                  apiPlanService.js, planService.js
   hooks/         usePeakFilters.js, usePeakSelection.js, usePlans.js,
-                 usePlanFilters.js, useDeletePlan.js, usePlanRecord.js
+                 usePlanFilters.js, useDeletePlan.js
   providers/     PeakSelectionProvider.jsx, PlansProvider.jsx
   data/          peaks.js, plans.js
   pages/         HomePage, PeakListPage, CatalogContainer, PeakDetailsPage,
@@ -97,7 +98,9 @@ src/
 | PlansProvider | Знімок колекції, стани операцій, синхронізація | Спосіб збереження в адаптері |
 | planService | Єдина точка вибору реалізації | JSX і навігація |
 | Mock або API адаптер | Читання, запис, перетворення даних, помилки | Стан полів форми |
-| planValidation | Предметні правила й нормалізація | React, мережа, сховище |
+| planValidation | Предметні правила й нормалізація (у т.ч. дата РРРР-ММ-ДД, що існує в календарі) | React, мережа, сховище |
+| selectPlans | Пошук, фільтр поради, сортування; невідомі значення умов → «без умови» | URL, React, сховище |
+| usePlanFilters | Читання й зміна параметрів адреси, виклик `selectPlans` | Правила відбору |
 
 ```text
 Сторінки та форми
@@ -119,7 +122,7 @@ localStorage     або  REST API
 | --- | --- | --- | --- | --- |
 | `validatePlan(input, peaks)` | Поля плану | `{ ok: true, value }` | `{ ok: false, errors }` | `PlanPage`, `planContract` |
 | `planService.getAll({ signal })` | — | Масив планів | Виняток або скасування | `PlansProvider` |
-| `planService.getById(id, { signal })` | `id` | Один план | `NOT_FOUND` | `usePlanRecord` (за потреби) |
+| `planService.getById(id, { signal })` | `id` | Один план | `NOT_FOUND` | Частину контракту поки не викликає UI: деталі читають знімок |
 | `createPlan(input)` | Поля без `id` | `{ ok: true, record }` | `{ ok: false, … }` | `PlanCreatePage` |
 | `updatePlan(id, input)` | `id` і поля | `{ ok: true, record }`; `id` не змінюється | `{ ok: false, … }` | `PlanEditPage` |
 | `deletePlan(id)` | `id` | `{ ok: true }` | `{ ok: false, message }` | `useDeletePlan` |
@@ -140,7 +143,7 @@ localStorage     або  REST API
 
 ## Синхронізація та її межі
 
-Колекція змінюється лише після успіху сервісу, повернений запис застосовується до знімка. Читання має номер версії та `AbortController`: відповідь, що запізнилась, не затирає новіший знімок. Запис блокує повторну команду (`mutationLock`) і скасовує активне читання. Деталі й редактор читають той самий знімок; `usePlanRecord` (getById) підготовлено для випадків часткового списку чи пагінації. Зміни іншої вкладки з’являються після «Оновити дані». Автоматичного повтору запису немає: повтор POST міг би створити дублікат.
+Колекція змінюється лише після успіху сервісу, повернений запис застосовується до знімка. Читання має номер версії та `AbortController`: відповідь, що запізнилась, не затирає новіший знімок. Запис блокує повторну команду (`mutationLock`) і скасовує активне читання. Деталі й редактор читають той самий знімок; метод `getById` лишається в контракті для випадків часткового списку чи пагінації (окремий хук для нього видалено як невикористаний). Зміни іншої вкладки з’являються після «Оновити дані». Автоматичного повтору запису немає: повтор POST міг би створити дублікат.
 
 ## Правила переходів і часу існування
 
@@ -182,3 +185,6 @@ localStorage     або  REST API
 7. **Єдина точка вибору джерела:** `planService.js`; компоненти не імпортують адаптери.
 8. **Без прихованого відкату:** помилка обраного API не підміняється mock-даними.
 9. **Оформлення:** власні стилі в `src/index.css`, React Bootstrap не підключено.
+10. **Відбір планів — чиста функція** `selectPlans`: перевіряється окремо від URL; умови з адреси нормалізуються (`?advice=zzz` не ховає плани).
+11. **Тести перевіряють поведінку:** логіка, форма, інтеграція з підміною лише `planService`, адаптер із підміною `fetch` (див. README).
+12. **Мемоізацію не додано:** на реальному обсязі даних затримки немає; виміри — у `docs/project-plan.md`.

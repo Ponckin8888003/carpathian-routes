@@ -2,7 +2,8 @@
 
 Вебсервіс планування туристичних маршрутів українськими Карпатами (навчальний проєкт).
 
-Поточний етап (лабораторна 3.2): робота з даними, асинхронні запити й сервіси.
+Поточний етап (лабораторна 4.1): інтеграція, тести, оптимізація та збірка завершеного застосунку.
+Попередній етап (3.2): робота з даними, асинхронні запити й сервіси.
 Плани походів читаються й змінюються через сервіс `planService`. Основний режим —
 автономний mock із затримкою та збереженням у `localStorage` цього браузера.
 Для сумісного REST API підготовлено адаптер (з реальним API не перевірявся).
@@ -19,6 +20,12 @@ npm run dev
 ```
 
 Адреса: http://localhost:5173
+
+Тестові залежності додаються один раз і фіксуються в `package.json` та `package-lock.json`:
+
+```bash
+npm install -D vitest jsdom @testing-library/react @testing-library/dom @testing-library/user-event @testing-library/jest-dom
+```
 
 ## Адреси для перевірки
 
@@ -61,6 +68,26 @@ mock-даними. Змінні `VITE_` потрапляють у клієнтс
 версій запису немає; фактичне підключення REST API не виконано. Для хостингу потрібне повернення `index.html` для клієнтських
 маршрутів.
 
+## Тести й перевірки
+
+Засоби: Vitest, jsdom, React Testing Library, user-event, jest-dom (dev-залежності).
+
+```bash
+npm run test:run   # один завершений запуск усіх тестів
+npm run test       # режим спостереження під час розробки
+npm run lint
+```
+
+Що перевіряють тести:
+
+- `src/domain/planValidation.test.js` — правила, граничні значення, нормалізація, дати;
+- `src/domain/selectPlans.test.js` — пошук, фільтр, сортування без зміни джерела;
+- `src/services/apiPlanService.test.js` — адаптер API з підміною `fetch` (статуси, 204, некоректний JSON);
+- `src/pages/PlanPage.test.jsx` — форма: помилки, блокування повтору, збереження введення після відмови;
+- `src/App.integration.test.jsx` — справжні маршрути й провайдери з підміною лише `planService`: loading, error, retry, empty, створення, редагування, видалення, відсутні адреси.
+
+Тести з підміною сервісу доводять поведінку клієнта, а не роботу реального API.
+
 ## Збірка
 
 ```bash
@@ -68,9 +95,13 @@ npm run build
 npm run preview
 ```
 
-Перегляд збірки: http://localhost:4173
+Перегляд збірки: http://localhost:4173. `dist/` у Git не додається. Змінні `VITE_` зчитуються
+під час збірки: після зміни `.env.local` потрібна нова `npm run build`. Сховище mock прив’язане до
+origin, тому дані на портах 5173 і 4173 різні.
 
-## План
+## Документація
 
-Див. [docs/project-plan.md](docs/project-plan.md) і
-[docs/component-architecture.md](docs/component-architecture.md) (маршрути, стан, правила переходів).
+- [docs/project-plan.md](docs/project-plan.md) — вимоги, перелік готовності, вимірювання продуктивності;
+- [docs/component-architecture.md](docs/component-architecture.md) — відповідальності, стан, переходи;
+- [docs/defense-scenario.md](docs/defense-scenario.md) — сценарій демонстрації й межі рішення.
+
